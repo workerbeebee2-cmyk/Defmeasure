@@ -1,0 +1,1755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DEFMEASURE — Tactical Measurement Suite</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700&display=swap');
+
+  :root {
+    --bg: #0f1012;
+    --panel: #161a1d;
+    --panel2: #1c2227;
+    --border: #2a3540;
+    --border2: #3a4a55;
+    --accent: #e8a020;
+    --accent2: #f0b840;
+    --green: #3ddc84;
+    --red: #e84040;
+    --text: #c8d4dc;
+    --text2: #7a96a8;
+    --text3: #4a6070;
+    --font-mono: 'Share Tech Mono', monospace;
+    --font-ui: 'Rajdhani', sans-serif;
+    --font-head: 'Orbitron', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ui);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* TOP BAR */
+  #topbar {
+    background: #0a0c0e;
+    border-bottom: 1px solid var(--border);
+    padding: 0 16px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-shrink: 0;
+  }
+  #topbar .logo {
+    font-family: var(--font-head);
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  #topbar .logo span { color: var(--text3); font-size: 10px; }
+
+  #eq-name-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    max-width: 340px;
+  }
+  #eq-name-wrap label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    flex-shrink: 0;
+  }
+  #eq-name {
+    background: var(--panel2);
+    border: 1px solid var(--border2);
+    color: var(--accent);
+    font-family: var(--font-head);
+    font-size: 12px;
+    letter-spacing: 2px;
+    padding: 4px 10px;
+    height: 28px;
+    outline: none;
+    flex: 1;
+    text-transform: uppercase;
+  }
+  #eq-name::placeholder { color: var(--text3); font-family: var(--font-ui); font-size: 11px; letter-spacing: 1px; }
+
+  .topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+  }
+
+  .tb-btn {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    height: 28px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .tb-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .tb-btn.danger:hover { border-color: var(--red); color: var(--red); }
+  .tb-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+  .sep { width: 1px; height: 24px; background: var(--border); flex-shrink: 0; }
+
+  /* UNIT TOGGLE */
+  #unit-toggle {
+    display: flex;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    height: 28px;
+    flex-shrink: 0;
+  }
+  #unit-toggle button {
+    background: var(--panel2);
+    border: none;
+    border-right: 1px solid var(--border);
+    color: var(--text3);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 1px;
+    padding: 0 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+  #unit-toggle button:last-child { border-right: none; }
+  #unit-toggle button.active { background: var(--accent); color: #000; font-weight: bold; }
+
+  /* MAIN LAYOUT */
+  #main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* LEFT SIDEBAR */
+  #sidebar {
+    width: 200px;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow-y: auto;
+  }
+
+  .s-section {
+    border-bottom: 1px solid var(--border);
+    padding: 10px;
+  }
+  .s-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text3);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  /* Equipment type icons */
+  .eq-types {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .eq-type-btn {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-family: var(--font-ui);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding: 8px 4px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+  .eq-type-btn svg { width: 22px; height: 22px; }
+  .eq-type-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .eq-type-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(232,160,32,0.08); }
+
+  /* Measurement dropdown */
+  #measure-select {
+    width: 100%;
+    background: var(--panel2);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    font-family: var(--font-ui);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 6px 8px;
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237a96a8'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    padding-right: 24px;
+  }
+  #measure-select option { background: var(--panel2); }
+
+  /* Color swatch for selected measurement */
+  #selected-color-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text2);
+  }
+  #selected-color-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  /* Reference line section */
+  .ref-info {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text3);
+    line-height: 1.6;
+  }
+  .ref-info span { color: var(--green); }
+
+  /* Lines list */
+  #lines-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px;
+  }
+  .line-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 6px;
+    border: 1px solid var(--border);
+    margin-bottom: 4px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text2);
+    cursor: pointer;
+    transition: border-color 0.1s;
+    position: relative;
+  }
+  .line-item:hover { border-color: var(--border2); }
+  .line-item .li-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .line-item .li-name { flex: 1; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px; }
+  .line-item .li-len { color: var(--accent); flex-shrink: 0; }
+  .line-item .li-del { color: var(--text3); cursor: pointer; padding: 0 2px; flex-shrink: 0; }
+  .line-item .li-del:hover { color: var(--red); }
+  .line-item.ref-line { border-color: var(--green); }
+  .line-item.selected-li { border-color: #fff4; background: rgba(255,255,255,0.03); }
+
+  /* CANVAS AREA */
+  #canvas-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    background: #0a0c0e;
+    background-image:
+      linear-gradient(rgba(42,53,64,0.3) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(42,53,64,0.3) 1px, transparent 1px);
+    background-size: 40px 40px;
+    cursor: crosshair;
+  }
+
+  #canvas-wrap.panning { cursor: grabbing; }
+  #canvas-wrap.no-image { cursor: default; }
+
+  #canvas-container {
+    position: relative;
+    transform-origin: center center;
+  }
+
+  #img-canvas {
+    display: block;
+    position: absolute;
+    top: 0; left: 0;
+    pointer-events: none;
+  }
+
+  #draw-canvas {
+    display: block;
+    position: absolute;
+    top: 0; left: 0;
+  }
+
+  /* Upload overlay */
+  #upload-overlay {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    pointer-events: none;
+    z-index: 10;
+  }
+  #upload-overlay .uo-icon { font-size: 48px; opacity: 0.15; margin-bottom: 12px; }
+  #upload-overlay .uo-text {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* ANALYSIS PANEL */
+  #analysis {
+    width: 230px;
+    background: var(--panel);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  #analysis-header {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  #analysis-header .ah-title {
+    font-family: var(--font-head);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  #analyze-btn {
+    background: var(--accent);
+    border: none;
+    color: #000;
+    font-family: var(--font-head);
+    font-size: 9px;
+    letter-spacing: 2px;
+    padding: 5px 10px;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-weight: 700;
+    transition: background 0.15s;
+  }
+  #analyze-btn:hover { background: var(--accent2); }
+
+  #analysis-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+  }
+
+  .an-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(42,53,64,0.7);
+  }
+  .an-row:last-child { border-bottom: none; }
+  .an-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; border: 1px solid rgba(255,255,255,0.15); }
+  .an-info { flex: 1; }
+  .an-name {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+  .an-val {
+    font-family: var(--font-head);
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 1px;
+  }
+  .an-val.ref { color: var(--green); }
+  .an-px {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    color: var(--text3);
+    margin-top: 1px;
+  }
+
+  #analysis-empty {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text3);
+    text-align: center;
+    padding: 30px 16px;
+    line-height: 1.8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* REF INPUT TOOLTIP */
+  #ref-input-box {
+    position: fixed;
+    background: var(--panel2);
+    border: 1px solid var(--green);
+    padding: 8px 10px;
+    display: none;
+    gap: 6px;
+    align-items: center;
+    z-index: 1000;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  }
+  #ref-input-box label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--green);
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+  #ref-input-val {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--green);
+    color: var(--green);
+    font-family: var(--font-head);
+    font-size: 14px;
+    width: 80px;
+    outline: none;
+    text-align: center;
+  }
+  #ref-input-ok {
+    background: var(--green);
+    border: none;
+    color: #000;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  /* STATUS BAR */
+  #statusbar {
+    height: 24px;
+    background: #0a0c0e;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 20px;
+    flex-shrink: 0;
+  }
+  .sb-item {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text3);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    display: flex;
+    gap: 6px;
+  }
+  .sb-item span { color: var(--text2); }
+  .sb-item.mode span { color: var(--accent); }
+
+  /* Scrollbars */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--panel); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+  /* Export overlay */
+  #export-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+  }
+  #export-modal.show { display: flex; }
+  #export-card {
+    background: var(--panel);
+    border: 1px solid var(--border2);
+    padding: 24px;
+    min-width: 260px;
+  }
+  #export-card h3 {
+    font-family: var(--font-head);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .exp-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .exp-btn {
+    flex: 1;
+    background: var(--panel2);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    padding: 10px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.15s;
+  }
+  .exp-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .exp-close {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text3);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 6px 12px;
+    cursor: pointer;
+    width: 100%;
+    text-transform: uppercase;
+    transition: all 0.15s;
+  }
+  .exp-close:hover { border-color: var(--red); color: var(--red); }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <div class="logo">DEFMEASURE <span>// TACTICAL SUITE</span></div>
+  <div class="sep"></div>
+  <div id="eq-name-wrap">
+    <label>EQ-ID</label>
+    <input type="text" id="eq-name" placeholder="Enter equipment designation..." maxlength="60" />
+  </div>
+  <div class="sep"></div>
+  <div class="topbar-actions">
+    <label class="tb-btn" style="cursor:pointer;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+      LOAD IMAGE
+      <input type="file" id="file-input" accept="image/*" style="display:none;">
+    </label>
+    <div class="sep"></div>
+    <div id="unit-toggle">
+      <button data-unit="cm">cm</button>
+      <button data-unit="in">in</button>
+      <button class="active" data-unit="ft">ft</button>
+      <button data-unit="m">m</button>
+    </div>
+    <div class="sep"></div>
+    <button class="tb-btn" id="undo-btn" title="Ctrl+Z">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10h10a5 5 0 010 10H9M3 10l4-4M3 10l4 4"/></svg>
+      UNDO
+    </button>
+    <button class="tb-btn" id="redo-btn" title="Ctrl+Shift+Z">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10H11a5 5 0 000 10h4M21 10l-4-4M21 10l-4 4"/></svg>
+      REDO
+    </button>
+    <div class="sep"></div>
+    <button class="tb-btn danger" id="clear-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg>
+      CLEAR LINES
+    </button>
+    <button class="tb-btn" id="export-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      EXPORT
+    </button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+
+  <!-- LEFT SIDEBAR -->
+  <div id="sidebar">
+    <div class="s-section">
+      <div class="s-label">Platform Type</div>
+      <div class="eq-types">
+        <button class="eq-type-btn active" data-type="air">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M22 16.5L13 5.5l-3 4-5.5-2L2 9.5l5.5 2.5L6 15l2 1 2.5-2.5 3 6.5 2-1-1-5.5L17 12l5 4.5z"/>
+          </svg>
+          AIR
+        </button>
+        <button class="eq-type-btn" data-type="land">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="9" width="18" height="8" rx="1"/>
+            <path d="M5 9V7h14v2"/>
+            <circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/>
+            <path d="M7 9h10"/>
+          </svg>
+          LAND
+        </button>
+        <button class="eq-type-btn" data-type="sea">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M3 17c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/>
+            <path d="M4 13l1-5h14l1 5"/>
+            <path d="M9 8V5l3-2 3 2v3"/>
+          </svg>
+          SEA
+        </button>
+        <button class="eq-type-btn" data-type="other">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/>
+          </svg>
+          OTHER
+        </button>
+      </div>
+    </div>
+
+    <div class="s-section">
+      <div class="s-label">Measurement Type</div>
+      <select id="measure-select"></select>
+      <div id="selected-color-row">
+        <div id="selected-color-dot" style="background:#3ddc84"></div>
+        <span id="selected-color-label">REF LINE</span>
+      </div>
+      <div class="ref-info" style="margin-top:10px;" id="ref-hint">
+        <span>● SET GREEN REFERENCE</span><br>
+        Draw first line = reference
+      </div>
+    </div>
+
+    <div class="s-section" style="padding:6px 10px;">
+      <div class="s-label">LINES</div>
+    </div>
+    <div id="lines-list"></div>
+  </div>
+
+  <!-- CANVAS -->
+  <div id="canvas-wrap" class="no-image">
+    <div id="upload-overlay">
+      <div class="uo-icon">⊕</div>
+      <div class="uo-text">Load image to begin<br><br>Use LOAD IMAGE button above</div>
+    </div>
+    <div id="canvas-container">
+      <canvas id="img-canvas"></canvas>
+      <canvas id="draw-canvas"></canvas>
+    </div>
+  </div>
+
+  <!-- ANALYSIS PANEL -->
+  <div id="analysis">
+    <div id="analysis-header">
+      <span class="ah-title">Analysis</span>
+      <button id="analyze-btn">ANALYZE</button>
+    </div>
+    <div id="analysis-body">
+      <div id="analysis-empty">Draw lines on<br>the image<br>then press<br>ANALYZE</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- STATUS BAR -->
+<div id="statusbar">
+  <div class="sb-item mode">MODE: <span id="sb-mode">IDLE</span></div>
+  <div class="sb-item">LINES: <span id="sb-lines">0</span></div>
+  <div class="sb-item">ZOOM: <span id="sb-zoom">100%</span></div>
+  <div class="sb-item">CURSOR: <span id="sb-cursor">—</span></div>
+  <div class="sb-item" style="margin-left:auto;">[ Ctrl+Z UNDO ] [ Ctrl+Shift+Z REDO ] [ WHEEL ZOOM ] [ MMB PAN ]</div>
+</div>
+
+<!-- REF INPUT BOX -->
+<div id="ref-input-box">
+  <label>REF LENGTH:</label>
+  <input type="number" id="ref-input-val" placeholder="0.00" step="any" min="0.001">
+  <button id="ref-input-ok">OK</button>
+</div>
+
+<!-- EXPORT MODAL -->
+<div id="export-modal">
+  <div id="export-card">
+    <h3>Export Image</h3>
+    <div class="exp-row">
+      <button class="exp-btn" id="exp-jpg">JPG</button>
+      <button class="exp-btn" id="exp-png">PNG</button>
+    </div>
+    <button class="exp-close" id="exp-cancel">Cancel</button>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────────────────────────────────
+
+const MEASUREMENTS = {
+  air: [
+    { name: "Reference Line", key: "ref", color: "#3ddc84" },
+    { name: "Wingspan (Span)", key: "wingspan", color: "#ef5350" },
+    { name: "Chord", key: "chord", color: "#ff8a65" },
+    { name: "Root Chord", key: "root_chord", color: "#ffb74d" },
+    { name: "Tip Chord", key: "tip_chord", color: "#ffd54f" },
+    { name: "Mean Aerodynamic Chord (MAC)", key: "mac", color: "#a5d6a7" },
+    { name: "Sweep Angle", key: "sweep_angle", color: "#ce93d8" },
+    { name: "Wing Area", key: "wing_area", color: "#f48fb1" },
+    { name: "Aspect Ratio", key: "aspect_ratio", color: "#80cbc4" },
+    { name: "Fuselage Length", key: "fuselage_length", color: "#ef5350" },
+    { name: "Wheelbase", key: "wheelbase", color: "#42a5f5" },
+    { name: "Track", key: "track", color: "#26c6da" },
+    { name: "Folded Wingspan", key: "folded_wingspan", color: "#7e57c2" },
+    { name: "Spotting Factor", key: "spotting_factor", color: "#ec407a" },
+    { name: "Internal Bay Dimensions", key: "bay_dim", color: "#ab47bc" },
+    { name: "Combat Radius", key: "combat_radius", color: "#ff7043" },
+    { name: "Radar Cross Section (RCS)", key: "rcs", color: "#66bb6a" },
+    { name: "Wing Loading", key: "wing_loading", color: "#29b6f6" },
+    { name: "Thrust-to-Weight Ratio", key: "twr", color: "#d4e157" },
+    { name: "Hardpoint Clearances", key: "hardpoint", color: "#ff5252" },
+    { name: "Station Clearances", key: "station", color: "#40c4ff" },
+    { name: "Tail Height", key: "tail_height", color: "#69f0ae" },
+    { name: "Engine Diameter", key: "engine_dia", color: "#ea80fc" },
+    { name: "Intake Width", key: "intake_width", color: "#ffab40" },
+    { name: "Nozzle Diameter", key: "nozzle_dia", color: "#ff6e40" },
+  ],
+  land: [
+    { name: "Reference Line", key: "ref", color: "#3ddc84" },
+    { name: "Hull Length", key: "hull_length", color: "#ef5350" },
+    { name: "Overall Length", key: "overall_length", color: "#ff8a65" },
+    { name: "Hull Width", key: "hull_width", color: "#ffb74d" },
+    { name: "Overall Width", key: "overall_width", color: "#ffd54f" },
+    { name: "Hull Height", key: "hull_height", color: "#4fc3f7" },
+    { name: "Overall Height", key: "overall_height", color: "#42a5f5" },
+    { name: "Track Width", key: "track_width", color: "#80cbc4" },
+    { name: "Track Gauge", key: "track_gauge", color: "#26c6da" },
+    { name: "Ground Clearance", key: "ground_clearance", color: "#a5d6a7" },
+    { name: "Wheelbase", key: "wheelbase", color: "#66bb6a" },
+    { name: "Wheel Track", key: "wheel_track", color: "#69f0ae" },
+    { name: "Turret Ring Diameter", key: "turret_ring", color: "#ce93d8" },
+    { name: "Turret Width", key: "turret_width", color: "#ab47bc" },
+    { name: "Gun Barrel Length", key: "gun_barrel", color: "#f48fb1" },
+    { name: "Gun Caliber", key: "gun_caliber", color: "#ec407a" },
+    { name: "Bore Diameter", key: "bore_dia", color: "#ff5252" },
+    { name: "Suspension Stroke", key: "suspension", color: "#ff7043" },
+    { name: "Fording Depth", key: "fording_depth", color: "#29b6f6" },
+    { name: "Armor Thickness (Front)", key: "armor_front", color: "#d4e157" },
+    { name: "Armor Thickness (Side)", key: "armor_side", color: "#ffab40" },
+    { name: "ERA Block Size", key: "era_size", color: "#7e57c2" },
+    { name: "Exhaust Width", key: "exhaust_w", color: "#ff6e40" },
+    { name: "Access Hatch (Driver)", key: "hatch_driver", color: "#ea80fc" },
+    { name: "Access Hatch (Commander)", key: "hatch_cmdr", color: "#40c4ff" },
+  ],
+  sea: [
+    { name: "Reference Line", key: "ref", color: "#3ddc84" },
+    { name: "Overall Length (LOA)", key: "loa", color: "#ef5350" },
+    { name: "Length at Waterline (LWL)", key: "lwl", color: "#ff8a65" },
+    { name: "Length Between Perpendiculars (LBP)", key: "lbp", color: "#ffb74d" },
+    { name: "Beam (Maximum Width)", key: "beam", color: "#4fc3f7" },
+    { name: "Beam at Waterline", key: "beam_wl", color: "#42a5f5" },
+    { name: "Draft (Waterline)", key: "draft", color: "#29b6f6" },
+    { name: "Freeboard Height", key: "freeboard", color: "#26c6da" },
+    { name: "Mast Height", key: "mast_height", color: "#80cbc4" },
+    { name: "Funnel Height", key: "funnel_height", color: "#a5d6a7" },
+    { name: "Superstructure Height", key: "superstructure", color: "#66bb6a" },
+    { name: "Waterplane Area", key: "waterplane", color: "#69f0ae" },
+    { name: "Turret Ring Diameter", key: "turret_ring", color: "#ce93d8" },
+    { name: "Gun Barrel Length", key: "gun_barrel", color: "#ab47bc" },
+    { name: "Hangar Dimensions", key: "hangar_dim", color: "#f48fb1" },
+    { name: "Flight Deck Length", key: "flight_deck_l", color: "#ec407a" },
+    { name: "Flight Deck Width", key: "flight_deck_w", color: "#ff5252" },
+    { name: "Sonar Dome Diameter", key: "sonar_dome", color: "#ff7043" },
+    { name: "Propeller Diameter", key: "prop_dia", color: "#d4e157" },
+    { name: "Torpedo Tube Diameter", key: "torp_dia", color: "#ffab40" },
+    { name: "Waterline Width (Bow)", key: "bow_width", color: "#7e57c2" },
+    { name: "Waterline Width (Stern)", key: "stern_width", color: "#ff6e40" },
+    { name: "Bulkhead Spacing", key: "bulkhead", color: "#ea80fc" },
+    { name: "Anchor Hawse Diameter", key: "hawse_dia", color: "#40c4ff" },
+    { name: "Bilge Keel Depth", key: "bilge_keel", color: "#e040fb" },
+  ],
+  other: [
+    { name: "Reference Line", key: "ref", color: "#3ddc84" },
+    { name: "Overall Length", key: "overall_length", color: "#ef5350" },
+    { name: "Overall Width", key: "overall_width", color: "#ff8a65" },
+    { name: "Overall Height", key: "overall_height", color: "#ffb74d" },
+    { name: "Diameter", key: "diameter", color: "#4fc3f7" },
+    { name: "Radius", key: "radius", color: "#42a5f5" },
+    { name: "Depth", key: "depth", color: "#29b6f6" },
+    { name: "Wall Thickness", key: "wall_thick", color: "#26c6da" },
+    { name: "Bore Diameter", key: "bore_dia", color: "#80cbc4" },
+    { name: "Barrel Length", key: "barrel_length", color: "#a5d6a7" },
+    { name: "Muzzle Width", key: "muzzle_width", color: "#66bb6a" },
+    { name: "Mounting Width", key: "mounting_w", color: "#69f0ae" },
+    { name: "Mounting Height", key: "mounting_h", color: "#ce93d8" },
+    { name: "Magazine Depth", key: "magazine_d", color: "#ab47bc" },
+    { name: "Payload Bay", key: "payload_bay", color: "#f48fb1" },
+    { name: "Warhead Length", key: "warhead_l", color: "#ec407a" },
+    { name: "Fin Span", key: "fin_span", color: "#ff5252" },
+    { name: "Guidance Section", key: "guidance_sec", color: "#ff7043" },
+    { name: "Nozzle Diameter", key: "nozzle_dia", color: "#d4e157" },
+    { name: "Antenna Length", key: "antenna_l", color: "#ffab40" },
+    { name: "Optic Aperture", key: "optic_apt", color: "#7e57c2" },
+    { name: "Custom A", key: "custom_a", color: "#ff6e40" },
+    { name: "Custom B", key: "custom_b", color: "#ea80fc" },
+    { name: "Custom C", key: "custom_c", color: "#40c4ff" },
+    { name: "Custom D", key: "custom_d", color: "#e040fb" },
+  ]
+};
+
+const UNIT_CONV = { cm: 1, in: 0.393701, ft: 0.0328084, m: 0.01 };
+const UNIT_LABELS = { cm: 'cm', in: 'in', ft: 'ft', m: 'm' };
+
+// ─────────────────────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────────────────────
+
+let state = {
+  image: null,
+  imgW: 0, imgH: 0,
+  lines: [],         // [{id, name, key, color, x1,y1,x2,y2, isRef, refValueCm, pixelLen}]
+  drawing: false,
+  drawStart: null,
+  unit: 'ft',
+  eqType: 'air',
+  selectedMeasure: null,
+  zoom: 1,
+  panX: 0, panY: 0,
+  isPanning: false,
+  panStart: null,
+  history: [],
+  future: [],
+  analysisData: [],
+  selectedLineId: null,
+  refPixels: null,    // pixels of reference line
+  refValueCm: null,
+  tempLine: null,
+  pendingRefLine: null,
+};
+
+// ─────────────────────────────────────────────────────────────────────────
+// ELEMENTS
+// ─────────────────────────────────────────────────────────────────────────
+
+const imgCanvas = document.getElementById('img-canvas');
+const drawCanvas = document.getElementById('draw-canvas');
+const imgCtx = imgCanvas.getContext('2d');
+const drawCtx = drawCanvas.getContext('2d');
+const canvasWrap = document.getElementById('canvas-wrap');
+const canvasContainer = document.getElementById('canvas-container');
+const uploadOverlay = document.getElementById('upload-overlay');
+const fileInput = document.getElementById('file-input');
+const measureSelect = document.getElementById('measure-select');
+const linesList = document.getElementById('lines-list');
+const analysisBody = document.getElementById('analysis-body');
+const analyzeBtn = document.getElementById('analyze-btn');
+const refInputBox = document.getElementById('ref-input-box');
+const refInputVal = document.getElementById('ref-input-val');
+const refInputOk = document.getElementById('ref-input-ok');
+const eqName = document.getElementById('eq-name');
+const sbMode = document.getElementById('sb-mode');
+const sbLines = document.getElementById('sb-lines');
+const sbZoom = document.getElementById('sb-zoom');
+const sbCursor = document.getElementById('sb-cursor');
+const exportModal = document.getElementById('export-modal');
+
+// ─────────────────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────────────────
+
+function populateMeasureSelect() {
+  measureSelect.innerHTML = '';
+  const list = MEASUREMENTS[state.eqType];
+  list.forEach((m, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = m.name;
+    measureSelect.appendChild(opt);
+  });
+  state.selectedMeasure = list[0];
+  updateSelectedColorRow();
+}
+
+function updateSelectedColorRow() {
+  const idx = parseInt(measureSelect.value);
+  const m = MEASUREMENTS[state.eqType][idx];
+  state.selectedMeasure = m;
+  document.getElementById('selected-color-dot').style.background = m.color;
+  document.getElementById('selected-color-label').textContent = m.name.toUpperCase().slice(0,22);
+}
+
+measureSelect.addEventListener('change', updateSelectedColorRow);
+
+// Equipment type buttons
+document.querySelectorAll('.eq-type-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.eq-type-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.eqType = btn.dataset.type;
+    populateMeasureSelect();
+  });
+});
+
+// Unit toggle
+document.querySelectorAll('#unit-toggle button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#unit-toggle button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.unit = btn.dataset.unit;
+    renderLines();      // refresh value labels on canvas
+    renderAnalysis();
+    renderLinesList();
+  });
+});
+
+populateMeasureSelect();
+
+// ─────────────────────────────────────────────────────────────────────────
+// IMAGE LOAD
+// ─────────────────────────────────────────────────────────────────────────
+
+fileInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      state.image = img;
+      state.imgW = img.width;
+      state.imgH = img.height;
+      state.lines = [];
+      state.history = [];
+      state.future = [];
+      state.analysisData = [];
+      state.refPixels = null;
+      state.refValueCm = null;
+
+      imgCanvas.width = img.width;
+      imgCanvas.height = img.height;
+      drawCanvas.width = img.width;
+      drawCanvas.height = img.height;
+      canvasContainer.style.width = img.width + 'px';
+      canvasContainer.style.height = img.height + 'px';
+
+      imgCtx.drawImage(img, 0, 0);
+      uploadOverlay.style.display = 'none';
+      canvasWrap.classList.remove('no-image');
+
+      // auto-fit
+      fitToView();
+      renderLines();
+      renderLinesList();
+      renderAnalysis();
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+});
+
+function fitToView() {
+  const ww = canvasWrap.clientWidth - 40;
+  const wh = canvasWrap.clientHeight - 40;
+  const sx = ww / state.imgW;
+  const sy = wh / state.imgH;
+  state.zoom = Math.min(sx, sy, 1);
+  state.panX = 0;
+  state.panY = 0;
+  applyTransform();
+}
+
+function applyTransform() {
+  canvasContainer.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.zoom})`;
+  sbZoom.textContent = Math.round(state.zoom * 100) + '%';
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// CANVAS MOUSE EVENTS
+// ─────────────────────────────────────────────────────────────────────────
+
+function canvasPoint(e) {
+  const rect = drawCanvas.getBoundingClientRect();
+  return {
+    x: (e.clientX - rect.left) / state.zoom,
+    y: (e.clientY - rect.top) / state.zoom
+  };
+}
+
+canvasWrap.addEventListener('mousedown', e => {
+  if (!state.image) return;
+
+  if (e.button === 1) {
+    e.preventDefault();
+    state.isPanning = true;
+    state.panStart = { x: e.clientX - state.panX, y: e.clientY - state.panY };
+    canvasWrap.classList.add('panning');
+    return;
+  }
+
+  if (e.button === 0) {
+    const pt = canvasPoint(e);
+    state.drawing = true;
+    state.drawStart = pt;
+    state.tempLine = null;
+  }
+});
+
+canvasWrap.addEventListener('mousemove', e => {
+  if (!state.image) return;
+
+  if (state.isPanning) {
+    state.panX = e.clientX - state.panStart.x;
+    state.panY = e.clientY - state.panStart.y;
+    applyTransform();
+    return;
+  }
+
+  const pt = canvasPoint(e);
+  sbCursor.textContent = `${Math.round(pt.x)}, ${Math.round(pt.y)}`;
+
+  if (state.drawing) {
+    state.tempLine = { x1: state.drawStart.x, y1: state.drawStart.y, x2: pt.x, y2: pt.y };
+    renderLines();
+  }
+});
+
+canvasWrap.addEventListener('mouseup', e => {
+  if (e.button === 1) {
+    state.isPanning = false;
+    canvasWrap.classList.remove('panning');
+    return;
+  }
+
+  if (e.button === 0 && state.drawing && state.drawStart) {
+    const pt = canvasPoint(e);
+    const dx = pt.x - state.drawStart.x;
+    const dy = pt.y - state.drawStart.y;
+    const len = Math.sqrt(dx*dx + dy*dy);
+
+    if (len > 5) {
+      const measure = state.selectedMeasure;
+      const isRef = (measure.key === 'ref');
+      const newLine = {
+        id: Date.now() + Math.random(),
+        name: measure.name,
+        key: measure.key,
+        color: measure.color,
+        x1: state.drawStart.x, y1: state.drawStart.y,
+        x2: pt.x, y2: pt.y,
+        isRef: isRef,
+        refValueCm: isRef ? null : null,
+        pixelLen: len
+      };
+
+      if (isRef) {
+        // Add line immediately so it stays visible while user types the value
+        state.lines = state.lines.filter(l => !l.isRef); // remove old ref if any
+        state.lines.unshift(newLine);
+        state.pendingRefLine = newLine;
+        renderLines();
+        renderLinesList();
+        showRefInput(e.clientX, e.clientY);
+      } else {
+        pushHistory();
+        state.lines.push(newLine);
+        renderLines();
+        renderLinesList();
+      }
+    }
+
+    state.drawing = false;
+    state.drawStart = null;
+    state.tempLine = null;
+    renderLines();
+  }
+});
+
+canvasWrap.addEventListener('mouseleave', () => {
+  if (state.isPanning) {
+    state.isPanning = false;
+    canvasWrap.classList.remove('panning');
+  }
+  sbCursor.textContent = '—';
+});
+
+// Zoom
+canvasWrap.addEventListener('wheel', e => {
+  e.preventDefault();
+  const factor = e.deltaY < 0 ? 1.1 : 0.9;
+  state.zoom = Math.max(0.05, Math.min(20, state.zoom * factor));
+  applyTransform();
+}, { passive: false });
+
+// ─────────────────────────────────────────────────────────────────────────
+// REF INPUT
+// ─────────────────────────────────────────────────────────────────────────
+
+function showRefInput(cx, cy) {
+  refInputBox.style.display = 'flex';
+  refInputBox.style.left = Math.min(cx, window.innerWidth - 280) + 'px';
+  refInputBox.style.top = (cy + 12) + 'px';
+  refInputVal.value = '';
+  refInputVal.focus();
+  sbMode.textContent = 'SET REFERENCE VALUE';
+}
+
+function hideRefInput() {
+  refInputBox.style.display = 'none';
+  // If cancelled without confirming, remove the pre-drawn ref line
+  if (state.pendingRefLine && state.pendingRefLine.refValueCm == null) {
+    state.lines = state.lines.filter(l => l.id !== state.pendingRefLine.id);
+    renderLines();
+    renderLinesList();
+  }
+  state.pendingRefLine = null;
+  sbMode.textContent = state.image ? 'DRAW' : 'IDLE';
+}
+
+refInputOk.addEventListener('click', confirmRef);
+refInputVal.addEventListener('keydown', e => { if (e.key === 'Enter') confirmRef(); if (e.key === 'Escape') hideRefInput(); });
+
+function confirmRef() {
+  const val = parseFloat(refInputVal.value);
+  if (!val || val <= 0) { refInputVal.style.borderColor = '#e84040'; return; }
+  refInputVal.style.borderColor = '';
+
+  const line = state.pendingRefLine;
+  // Convert from current unit to cm and stamp onto the line already in state.lines
+  const valCm = val / UNIT_CONV[state.unit];
+  line.refValueCm = valCm;
+  line.isRef = true;
+
+  // line is already in state.lines (added on mouseup); just record ref metrics
+  pushHistory();
+  state.refPixels = line.pixelLen;
+  state.refValueCm = valCm;
+
+  hideRefInput();
+  renderLines();
+  renderLinesList();
+  sbMode.textContent = 'DRAW';
+
+  // Auto-advance to the first non-ref measurement (index 1)
+  const list = MEASUREMENTS[state.eqType];
+  if (list.length > 1) {
+    measureSelect.value = 1;
+    updateSelectedColorRow();
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// RENDER LINES ON CANVAS
+// ─────────────────────────────────────────────────────────────────────────
+
+function getLineValue(line) {
+  // Returns display string for the line's measured value
+  const refLine = state.lines.find(l => l.isRef);
+  if (line.isRef && line.refValueCm != null) {
+    const v = line.refValueCm * UNIT_CONV[state.unit];
+    return v.toFixed(2) + ' ' + UNIT_LABELS[state.unit];
+  } else if (refLine && refLine.refValueCm != null && refLine.pixelLen > 0) {
+    const pxPerCm = refLine.pixelLen / refLine.refValueCm;
+    const v = (line.pixelLen / pxPerCm) * UNIT_CONV[state.unit];
+    return v.toFixed(2) + ' ' + UNIT_LABELS[state.unit];
+  }
+  return null; // no value yet
+}
+
+function renderLines() {
+  drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+
+  const allLines = [...state.lines];
+  if (state.tempLine) {
+    const m = state.selectedMeasure;
+    allLines.push({ ...state.tempLine, color: m.color, name: m.name, id: -1, pixelLen: (() => { const dx = state.tempLine.x2 - state.tempLine.x1, dy = state.tempLine.y2 - state.tempLine.y1; return Math.sqrt(dx*dx+dy*dy); })() });
+  }
+
+  // Pass 1: draw all line geometries first
+  allLines.forEach(line => drawLineGeometry(drawCtx, line));
+
+  // Pass 2: place labels with collision avoidance
+  // Collect candidate label positions (midpoint of each line, always horizontal)
+  const FONT_SIZE = 10;
+  const PAD_X = 6, PAD_Y = 3;
+  drawCtx.font = `${FONT_SIZE}px "Share Tech Mono", monospace`;
+
+  // Build placed boxes array for overlap resolution
+  const placed = []; // [{x, y, w, h}]  — all in canvas coords, centered
+
+  allLines.forEach(line => {
+    const valStr = getLineValue(line);
+    const label = valStr !== null ? valStr : '— —';
+
+    const tw = drawCtx.measureText(label).width;
+    const bw = tw + PAD_X * 2;
+    const bh = FONT_SIZE + PAD_Y * 2;
+
+    // Nominal position: midpoint of line
+    const mx = (line.x1 + line.x2) / 2;
+    const my = (line.y1 + line.y2) / 2;
+
+    // Try positions: above mid, below mid, then offset along normals
+    const dx = line.x2 - line.x1, dy = line.y2 - line.y1;
+    const len = Math.sqrt(dx*dx + dy*dy) || 1;
+    const nx = -dy/len, ny = dx/len; // perpendicular unit
+
+    const offsets = [
+      { ox: 0, oy: -14 },
+      { ox: 0, oy: 14 },
+      { ox: nx*20, oy: ny*20 - 14 },
+      { ox: -nx*20, oy: -ny*20 - 14 },
+      { ox: nx*36, oy: ny*36 - 14 },
+      { ox: -nx*36, oy: -ny*36 - 14 },
+      { ox: 0, oy: -28 },
+      { ox: 0, oy: 28 },
+    ];
+
+    let bestX = mx, bestY = my - 14;
+    let found = false;
+
+    for (const off of offsets) {
+      const cx = mx + off.ox;
+      const cy = my + off.oy;
+      const box = { x: cx - bw/2, y: cy - bh/2, w: bw, h: bh };
+      if (!boxesOverlap(placed, box)) {
+        bestX = cx; bestY = cy;
+        placed.push(box);
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      // Force place with extra spacing
+      const cy = my - 14 - placed.length * (bh + 2);
+      placed.push({ x: mx - bw/2, y: cy - bh/2, w: bw, h: bh });
+      bestX = mx; bestY = cy;
+    }
+
+    // Draw label: horizontal, black 60% bg pill, colored text
+    drawCtx.save();
+    drawCtx.shadowBlur = 0;
+
+    // Rounded rect background
+    const rx = bestX - bw/2, ry = bestY - bh/2;
+    drawCtx.fillStyle = 'rgba(0,0,0,0.60)';
+    roundRect(drawCtx, rx, ry, bw, bh, 3);
+    drawCtx.fill();
+
+    // Thin color border
+    drawCtx.strokeStyle = line.color + '88';
+    drawCtx.lineWidth = 0.6;
+    roundRect(drawCtx, rx, ry, bw, bh, 3);
+    drawCtx.stroke();
+
+    // Text
+    drawCtx.fillStyle = line.color;
+    drawCtx.font = `${FONT_SIZE}px "Share Tech Mono", monospace`;
+    drawCtx.textAlign = 'center';
+    drawCtx.textBaseline = 'middle';
+    drawCtx.fillText(label, bestX, bestY);
+
+    drawCtx.restore();
+  });
+}
+
+function boxesOverlap(placed, box) {
+  for (const p of placed) {
+    const margin = 3;
+    if (box.x < p.x + p.w + margin &&
+        box.x + box.w > p.x - margin &&
+        box.y < p.y + p.h + margin &&
+        box.y + box.h > p.y - margin) return true;
+  }
+  return false;
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function drawLineGeometry(ctx, line) {
+  const { x1, y1, x2, y2, color, isRef } = line;
+
+  ctx.save();
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 5;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = isRef ? 1.6 : 1.2;
+  ctx.setLineDash([]);
+
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.stroke();
+
+  // Endpoint dots
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = color;
+  ctx.beginPath(); ctx.arc(x1, y1, 2.5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x2, y2, 2.5, 0, Math.PI*2); ctx.fill();
+
+  // Tick marks
+  const dx = x2 - x1, dy = y2 - y1;
+  const len = Math.sqrt(dx*dx + dy*dy);
+  if (len > 0) {
+    const nx = -dy/len, ny = dx/len;
+    const tickLen = 4;
+    ctx.lineWidth = 1.0;
+    ctx.beginPath();
+    ctx.moveTo(x1 + nx*tickLen, y1 + ny*tickLen);
+    ctx.lineTo(x1 - nx*tickLen, y1 - ny*tickLen);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2 + nx*tickLen, y2 + ny*tickLen);
+    ctx.lineTo(x2 - nx*tickLen, y2 - ny*tickLen);
+    ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
+// Legacy alias used by export
+function drawLine(ctx, line) {
+  drawLineGeometry(ctx, line);
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// LINES LIST
+// ─────────────────────────────────────────────────────────────────────────
+
+function renderLinesList() {
+  linesList.innerHTML = '';
+  sbLines.textContent = state.lines.length;
+  const refLine = state.lines.find(l => l.isRef);
+
+  state.lines.forEach(line => {
+    const div = document.createElement('div');
+    div.className = 'line-item' + (line.isRef ? ' ref-line' : '') + (state.selectedLineId === line.id ? ' selected-li' : '');
+
+    let lenStr = '—';
+    if (line.isRef && line.refValueCm != null) {
+      const v = line.refValueCm * UNIT_CONV[state.unit];
+      lenStr = v.toFixed(2) + ' ' + UNIT_LABELS[state.unit];
+    } else if (refLine && refLine.refValueCm != null && refLine.pixelLen > 0) {
+      const pxPerUnit = refLine.pixelLen / refLine.refValueCm;
+      const measured = (line.pixelLen / pxPerUnit) * UNIT_CONV[state.unit];
+      lenStr = measured.toFixed(2) + ' ' + UNIT_LABELS[state.unit];
+    }
+
+    div.innerHTML = `
+      <div class="li-dot" style="background:${line.color}"></div>
+      <span class="li-name">${line.name}</span>
+      <span class="li-len">${lenStr}</span>
+      <span class="li-del" data-id="${line.id}">✕</span>
+    `;
+    div.querySelector('.li-del').addEventListener('click', e => {
+      e.stopPropagation();
+      pushHistory();
+      state.lines = state.lines.filter(l => l.id != line.id);
+      if (line.isRef) { state.refPixels = null; state.refValueCm = null; }
+      renderLines(); renderLinesList(); renderAnalysis();
+    });
+    div.addEventListener('click', () => {
+      state.selectedLineId = state.selectedLineId === line.id ? null : line.id;
+      renderLinesList();
+    });
+    linesList.appendChild(div);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// ANALYSIS
+// ─────────────────────────────────────────────────────────────────────────
+
+analyzeBtn.addEventListener('click', runAnalysis);
+
+function runAnalysis() {
+  const refLine = state.lines.find(l => l.isRef);
+  analysisBody.innerHTML = '';
+
+  if (state.lines.length === 0) {
+    analysisBody.innerHTML = '<div id="analysis-empty">No lines drawn yet.</div>';
+    return;
+  }
+
+  state.analysisData = [];
+
+  state.lines.forEach(line => {
+    let valCm = null;
+    if (line.isRef && line.refValueCm != null) {
+      valCm = line.refValueCm;
+    } else if (refLine && refLine.refValueCm != null && refLine.pixelLen > 0) {
+      const pxPerCm = refLine.pixelLen / refLine.refValueCm;
+      valCm = line.pixelLen / pxPerCm;
+    }
+
+    state.analysisData.push({ ...line, valCm });
+  });
+
+  renderAnalysis();
+}
+
+function renderAnalysis() {
+  analysisBody.innerHTML = '';
+  if (state.analysisData.length === 0) {
+    analysisBody.innerHTML = '<div id="analysis-empty">Draw lines on<br>the image<br>then press<br>ANALYZE</div>';
+    return;
+  }
+
+  const refLine = state.lines.find(l => l.isRef);
+
+  state.analysisData.forEach(entry => {
+    let valCm = entry.valCm;
+    // Recalculate in case ref changed
+    if (entry.isRef && entry.refValueCm != null) valCm = entry.refValueCm;
+    else if (refLine && refLine.refValueCm != null && refLine.pixelLen > 0) {
+      valCm = entry.pixelLen / (refLine.pixelLen / refLine.refValueCm);
+    }
+
+    const display = valCm != null
+      ? (valCm * UNIT_CONV[state.unit]).toFixed(3) + ' ' + UNIT_LABELS[state.unit]
+      : '— (no ref)';
+
+    const row = document.createElement('div');
+    row.className = 'an-row';
+    row.innerHTML = `
+      <div class="an-dot" style="background:${entry.color}"></div>
+      <div class="an-info">
+        <div class="an-name">${entry.name}</div>
+        <div class="an-val${entry.isRef ? ' ref' : ''}">${display}</div>
+        <div class="an-px">${Math.round(entry.pixelLen)} px</div>
+      </div>
+    `;
+    analysisBody.appendChild(row);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// UNDO / REDO
+// ─────────────────────────────────────────────────────────────────────────
+
+function pushHistory() {
+  state.history.push(JSON.parse(JSON.stringify(state.lines)));
+  if (state.history.length > 60) state.history.shift();
+  state.future = [];
+}
+
+document.getElementById('undo-btn').addEventListener('click', undo);
+document.getElementById('redo-btn').addEventListener('click', redo);
+
+function undo() {
+  if (state.history.length === 0) return;
+  state.future.push(JSON.parse(JSON.stringify(state.lines)));
+  state.lines = state.history.pop();
+  syncRefFromLines();
+  renderLines(); renderLinesList(); renderAnalysis();
+}
+function redo() {
+  if (state.future.length === 0) return;
+  state.history.push(JSON.parse(JSON.stringify(state.lines)));
+  state.lines = state.future.pop();
+  syncRefFromLines();
+  renderLines(); renderLinesList(); renderAnalysis();
+}
+
+function syncRefFromLines() {
+  const ref = state.lines.find(l => l.isRef);
+  if (ref) { state.refPixels = ref.pixelLen; state.refValueCm = ref.refValueCm; }
+  else { state.refPixels = null; state.refValueCm = null; }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.shiftKey && e.key === 'Z') { redo(); return; }
+  if (e.ctrlKey && e.key === 'z') { undo(); return; }
+  if (e.key === 'Escape') { hideRefInput(); }
+  if (e.key === 'Delete' && state.selectedLineId) {
+    pushHistory();
+    const line = state.lines.find(l => l.id === state.selectedLineId);
+    if (line && line.isRef) { state.refPixels = null; state.refValueCm = null; }
+    state.lines = state.lines.filter(l => l.id !== state.selectedLineId);
+    state.selectedLineId = null;
+    renderLines(); renderLinesList(); renderAnalysis();
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────
+// CLEAR
+// ─────────────────────────────────────────────────────────────────────────
+
+document.getElementById('clear-btn').addEventListener('click', () => {
+  if (state.lines.length === 0) return;
+  pushHistory();
+  state.lines = [];
+  state.refPixels = null;
+  state.refValueCm = null;
+  state.analysisData = [];
+  renderLines(); renderLinesList(); renderAnalysis();
+});
+
+// ─────────────────────────────────────────────────────────────────────────
+// STATUS MODE UPDATE
+// ─────────────────────────────────────────────────────────────────────────
+
+setInterval(() => {
+  if (!state.image) { sbMode.textContent = 'IDLE'; return; }
+  if (state.isPanning) { sbMode.textContent = 'PAN'; return; }
+  if (state.drawing) { sbMode.textContent = 'DRAWING'; return; }
+  sbMode.textContent = 'DRAW';
+}, 100);
+
+// ─────────────────────────────────────────────────────────────────────────
+// EXPORT
+// ─────────────────────────────────────────────────────────────────────────
+
+document.getElementById('export-btn').addEventListener('click', () => {
+  if (!state.image) return;
+  exportModal.classList.add('show');
+});
+document.getElementById('exp-cancel').addEventListener('click', () => exportModal.classList.remove('show'));
+document.getElementById('exp-jpg').addEventListener('click', () => doExport('jpeg'));
+document.getElementById('exp-png').addEventListener('click', () => doExport('png'));
+
+function doExport(fmt) {
+  exportModal.classList.remove('show');
+  if (!state.image) return;
+
+  // Ensure analysis is up to date
+  runAnalysis();
+
+  const iW = state.imgW;
+  const iH = state.imgH;
+  const REPORT_W = 360;
+  const HEADER_H = 40;
+  const PADDING = 20;
+
+  const totalW = iW + REPORT_W;
+  const totalH = Math.max(iH + HEADER_H, 200 + HEADER_H);
+
+  const exp = document.createElement('canvas');
+  exp.width = totalW;
+  exp.height = totalH + HEADER_H;
+  const ctx = exp.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#0f1012';
+  ctx.fillRect(0, 0, totalW, exp.height);
+
+  // Header strip
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(0, 0, totalW, HEADER_H);
+
+  const eqTitle = eqName.value.trim() || 'UNDESIGNATED EQUIPMENT';
+  ctx.font = 'bold 16px "Orbitron", monospace';
+  ctx.fillStyle = '#f0a000';
+  ctx.textAlign = 'center';
+  ctx.fillText(eqTitle.toUpperCase(), totalW / 2, HEADER_H / 2 + 6);
+
+  // Thin orange border under header
+  ctx.fillStyle = '#e8a020';
+  ctx.fillRect(0, HEADER_H - 1, totalW, 1);
+
+  // Image
+  ctx.drawImage(state.image, 0, HEADER_H);
+
+  // Draw lines + labels on export (same horizontal value-only style)
+  const tmp = document.createElement('canvas');
+  tmp.width = iW; tmp.height = iH;
+  const tc = tmp.getContext('2d');
+  state.lines.forEach(line => drawLineGeometry(tc, line));
+  const expPlaced = [];
+  const FONT_SIZE_E = 10, PAD_X_E = 6, PAD_Y_E = 3;
+  tc.font = `${FONT_SIZE_E}px "Share Tech Mono", monospace`;
+  state.lines.forEach(line => {
+    const refL = state.lines.find(l => l.isRef);
+    let valStr = null;
+    if (line.isRef && line.refValueCm != null) {
+      valStr = (line.refValueCm * UNIT_CONV[state.unit]).toFixed(2) + ' ' + UNIT_LABELS[state.unit];
+    } else if (refL && refL.refValueCm != null && refL.pixelLen > 0) {
+      valStr = ((line.pixelLen / (refL.pixelLen / refL.refValueCm)) * UNIT_CONV[state.unit]).toFixed(2) + ' ' + UNIT_LABELS[state.unit];
+    }
+    const label = valStr || '—';
+    const tw = tc.measureText(label).width;
+    const bw = tw + PAD_X_E*2, bh = FONT_SIZE_E + PAD_Y_E*2;
+    const mx = (line.x1+line.x2)/2, my = (line.y1+line.y2)/2;
+    const ddx = line.x2-line.x1, ddy = line.y2-line.y1, ll = Math.sqrt(ddx*ddx+ddy*ddy)||1;
+    const nnx = -ddy/ll, nny = ddx/ll;
+    const offs = [{ox:0,oy:-14},{ox:0,oy:14},{ox:nnx*20,oy:nny*20-14},{ox:-nnx*20,oy:-nny*20-14},{ox:nnx*36,oy:nny*36-14},{ox:0,oy:-28},{ox:0,oy:28}];
+    let bx = mx, by = my-14;
+    for (const off of offs) {
+      const cx2 = mx+off.ox, cy2 = my+off.oy;
+      const box = {x:cx2-bw/2,y:cy2-bh/2,w:bw,h:bh};
+      if (!boxesOverlap(expPlaced, box)) { bx=cx2; by=cy2; expPlaced.push(box); break; }
+    }
+    tc.save();
+    tc.fillStyle = 'rgba(0,0,0,0.60)';
+    roundRect(tc, bx-bw/2, by-bh/2, bw, bh, 3); tc.fill();
+    tc.strokeStyle = line.color+'88'; tc.lineWidth=0.6;
+    roundRect(tc, bx-bw/2, by-bh/2, bw, bh, 3); tc.stroke();
+    tc.fillStyle = line.color;
+    tc.font = `${FONT_SIZE_E}px "Share Tech Mono", monospace`;
+    tc.textAlign = 'center'; tc.textBaseline = 'middle';
+    tc.fillText(label, bx, by);
+    tc.restore();
+  });
+  ctx.drawImage(tmp, 0, HEADER_H);
+
+  // Divider
+  ctx.fillStyle = '#2a3540';
+  ctx.fillRect(iW, HEADER_H, 1, exp.height - HEADER_H);
+
+  // Report panel
+  const rX = iW + PADDING;
+  let rY = HEADER_H + PADDING;
+
+  ctx.fillStyle = '#e8a020';
+  ctx.font = 'bold 11px "Orbitron", monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText('ANALYSIS REPORT', rX, rY);
+  rY += 6;
+  ctx.fillStyle = '#2a3540';
+  ctx.fillRect(rX, rY, REPORT_W - PADDING*2, 1);
+  rY += 16;
+
+  // Equipment info
+  ctx.font = '10px "Share Tech Mono", monospace';
+  ctx.fillStyle = '#4a6070';
+  ctx.fillText('DESIGNATION:', rX, rY);
+  ctx.fillStyle = '#c8d4dc';
+  ctx.fillText(eqTitle.toUpperCase(), rX + 100, rY);
+  rY += 14;
+
+  ctx.fillStyle = '#4a6070';
+  ctx.fillText('UNIT:', rX, rY);
+  ctx.fillStyle = '#c8d4dc';
+  ctx.fillText(UNIT_LABELS[state.unit].toUpperCase(), rX + 100, rY);
+  rY += 14;
+
+  ctx.fillStyle = '#4a6070';
+  ctx.fillText('PLATFORM:', rX, rY);
+  ctx.fillStyle = '#c8d4dc';
+  ctx.fillText(state.eqType.toUpperCase(), rX + 100, rY);
+  rY += 14;
+
+  ctx.fillStyle = '#4a6070';
+  ctx.fillText('DATE:', rX, rY);
+  ctx.fillStyle = '#c8d4dc';
+  ctx.fillText(new Date().toISOString().slice(0,10), rX + 100, rY);
+  rY += 20;
+
+  ctx.fillStyle = '#2a3540';
+  ctx.fillRect(rX, rY, REPORT_W - PADDING*2, 1);
+  rY += 16;
+
+  // Measurements
+  const refLine = state.lines.find(l => l.isRef);
+
+  state.lines.forEach(line => {
+    if (rY > exp.height - 20) return;
+
+    let valCm = null;
+    if (line.isRef && line.refValueCm != null) valCm = line.refValueCm;
+    else if (refLine && refLine.refValueCm != null && refLine.pixelLen > 0) {
+      valCm = line.pixelLen / (refLine.pixelLen / refLine.refValueCm);
+    }
+
+    const display = valCm != null
+      ? (valCm * UNIT_CONV[state.unit]).toFixed(3) + ' ' + UNIT_LABELS[state.unit]
+      : '— (no reference)';
+
+    // Color dot
+    ctx.fillStyle = line.color;
+    ctx.beginPath();
+    ctx.arc(rX + 6, rY - 3, 5, 0, Math.PI*2);
+    ctx.fill();
+
+    // Name
+    ctx.font = '9px "Share Tech Mono", monospace';
+    ctx.fillStyle = '#7a96a8';
+    const shortN = line.name.length > 28 ? line.name.slice(0,26)+'…' : line.name;
+    ctx.fillText(shortN.toUpperCase(), rX + 16, rY);
+    rY += 13;
+
+    // Value
+    ctx.font = 'bold 13px "Orbitron", monospace';
+    ctx.fillStyle = line.isRef ? '#3ddc84' : '#e8a020';
+    ctx.fillText(display, rX + 16, rY);
+    rY += 8;
+
+    // Pixels
+    ctx.font = '8px "Share Tech Mono", monospace';
+    ctx.fillStyle = '#3a4a55';
+    ctx.fillText(Math.round(line.pixelLen) + ' px', rX + 16, rY);
+    rY += 16;
+
+    ctx.fillStyle = '#1c2227';
+    ctx.fillRect(rX, rY, REPORT_W - PADDING*2, 1);
+    rY += 8;
+  });
+
+  // Watermark
+  ctx.font = '8px "Share Tech Mono", monospace';
+  ctx.fillStyle = '#2a3540';
+  ctx.textAlign = 'right';
+  ctx.fillText('DEFMEASURE // TACTICAL SUITE', totalW - PADDING, exp.height - 8);
+
+  // Download
+  const link = document.createElement('a');
+  const eqSafe = eqTitle.replace(/[^a-zA-Z0-9_-]/g,'_').slice(0,40);
+  link.download = `DEFMEASURE_${eqSafe}_${Date.now()}.${fmt === 'jpeg' ? 'jpg' : 'png'}`;
+  link.href = exp.toDataURL('image/' + fmt, fmt === 'jpeg' ? 0.95 : undefined);
+  link.click();
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// PREVENT middle mouse scroll
+// ─────────────────────────────────────────────────────────────────────────
+document.addEventListener('mousedown', e => { if (e.button === 1) e.preventDefault(); });
+
+// ─────────────────────────────────────────────────────────────────────────
+// INIT STATUS
+// ─────────────────────────────────────────────────────────────────────────
+sbMode.textContent = 'IDLE';
+sbLines.textContent = '0';
+sbZoom.textContent = '100%';
+</script>
+</body>
+</html>
